@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+                                                     });
+                          <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -7,18 +8,24 @@
 <meta name="theme-color" content="#7c3aed">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-:root { --bg: #0f0f14; --card: #1a1a22; --primary: #7c3aed; --primary-dark: #6d28d9; --text: #e5e7eb; --text-muted: #9ca3af; --border: #2d2d3a; --success: #10b981; }
+:root { --bg: #0f0f14; --card: #1a1a22; --primary: #7c3aed; --primary-dark: #6d28d9; --primary-glow: #a78bfa; --text: #e5e7eb; --text-muted: #9ca3af; --border: #2d2d3a; --success: #10b981; --error: #ef4444; --warning: #f59e0b; --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; padding: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
 .app { width: 100%; max-width: 550px; display: flex; flex-direction: column; gap: 20px; }
 .player-card { background: var(--card); border: 1px solid var(--border); border-radius: 28px; padding: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
-.btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 18px; border-radius: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
-.btn-main:active { transform: scale(0.98); }
+.btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 18px; border-radius: 16px; font-weight: 800; cursor: pointer; margin-top: 10px; transition: var(--transition); }
+.btn-main:hover { background: var(--primary-dark); transform: scale(0.98); }
+.btn-permission { background: var(--success); color: white; border: none; padding: 14px 24px; border-radius: 40px; font-weight: bold; cursor: pointer; transition: var(--transition); margin-top: 10px; }
+.btn-permission:hover { transform: scale(0.98); opacity: 0.9; }
 .playlist { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 8px; max-height: 300px; overflow-y: auto; margin-top: 10px; }
-.track { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; cursor: pointer; transition: all 0.2s; }
-.track:active { background: rgba(124, 58, 237, 0.2); }
+.track { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; cursor: pointer; transition: var(--transition); }
+.track:hover { background: rgba(124, 58, 237, 0.1); }
 .track.active { background: rgba(124, 58, 237, 0.15); border-left: 3px solid var(--primary); }
-.permission-box { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); border-radius: 16px; padding: 16px; margin-bottom: 10px; text-align: center; }
-.btn-permission { background: var(--success); color: white; border: none; padding: 12px 24px; border-radius: 40px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+.permission-card { background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(124, 58, 237, 0.1)); border: 1px solid var(--success); border-radius: 20px; padding: 20px; text-align: center; margin-bottom: 10px; }
+.permission-card h3 { color: var(--success); margin-bottom: 10px; }
+.permission-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 15px; }
+.status-text { font-size: 12px; color: var(--text-muted); margin-top: 10px; text-align: center; }
+.progress-bar { width: 100%; height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px; overflow: hidden; display: none; }
+.progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
 </style>
 </head>
 <body>
@@ -33,145 +40,209 @@ body { background: var(--bg); color: var(--text); min-height: 100vh; display: fl
 <div class="app">
     <div class="player-card">
         <h2 id="title">Ben Music Pro</h2>
-        <p id="status" style="color: var(--text-muted); font-size: 12px;">📱 Verificando permissões...</p>
+        <p id="status" style="color: var(--text-muted); font-size: 12px;">🎵 Bem-vindo ao Ben Music Pro</p>
         <audio id="audio" style="width: 100%; margin-top: 20px;" controls></audio>
     </div>
 
-    <div id="permissionArea">
-        <div class="permission-box">
-            🎵 <strong>Permissão de Armazenamento</strong><br>
-            <small style="color: var(--text-muted);">Necessário para ler suas músicas</small><br>
-            <button id="requestPermBtn" class="btn-permission">📁 CONCEDER PERMISSÃO</button>
-        </div>
+    <!-- Área de permissão do Android -->
+    <div id="permissionArea" class="permission-card">
+        <h3>📱 PERMISSÃO DE ARMAZENAMENTO</h3>
+        <p>O Ben Music Pro precisa acessar suas músicas no dispositivo Android.<br>Clique abaixo para conceder permissão.</p>
+        <button id="requestPermBtn" class="btn-permission">✅ CONCEDER PERMISSÃO</button>
     </div>
 
-    <button id="scanBtn" class="btn-main" style="display: none;">🔍 ESCANEAR MÚSICAS</button>
+    <button id="scanBtn" class="btn-main" style="display: none;">🔍 ESCANEAR MEMÓRIA ANDROID</button>
+    
+    <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
     
     <div class="playlist" id="playlist">
-        <div style="text-align:center; padding:20px; color:gray;">🎵 Aguardando permissão para acessar as músicas 🎵</div>
+        <div style="text-align:center; padding:20px; color:gray;">🎵 Clique em "CONCEDER PERMISSÃO" para começar 🎵</div>
     </div>
 </div>
 
 <script>
-// Script para APK Android - Pede permissão direto ao sistema
+// Script completo para APK Android com permissão nativa
 const playerApp = {
     audio: document.getElementById('audio'),
     songs: [],
     hasPermission: false,
+    isScanning: false,
 
     async init() {
-        // Esconde popup após 2 segundos
+        // Popup - esconde após 3 segundos igual ao original
         setTimeout(() => {
             const popup = document.getElementById('flameNeonPopup');
             if (popup) popup.style.display = 'none';
-        }, 2000);
+        }, 3000);
         
-        // Verifica permissão no Android
-        await this.checkAndroidPermission();
-        
-        // Configura botão de permissão
+        // Configura botões
         document.getElementById('requestPermBtn').onclick = () => this.requestAndroidPermission();
+        document.getElementById('scanBtn').onclick = () => this.scanAllMusic();
         
-        // Botão de escanear
-        document.getElementById('scanBtn').onclick = () => this.scanMusicFiles();
+        // Verifica se já tem permissão
+        await this.checkPermission();
     },
 
-    // Verifica se já tem permissão (Android)
-    async checkAndroidPermission() {
+    // Verifica permissão atual
+    async checkPermission() {
         try {
-            // Tenta acessar um arquivo de teste (funciona no APK)
-            const testFile = await new Promise((resolve) => {
-                window.resolveLocalFileSystemURL ? 
-                    window.resolveLocalFileSystemURL('file:///sdcard/', 
-                        (entry) => resolve(true), 
-                        () => resolve(false)) : resolve(false);
-            });
-            
-            if (testFile) {
-                this.hasPermission = true;
-                document.getElementById('permissionArea').style.display = 'none';
-                document.getElementById('scanBtn').style.display = 'block';
-                document.getElementById('status').innerHTML = "✅ Permissão concedida! Clique em ESCANEAR MÚSICAS";
+            // Tenta acessar o storage do Android
+            if (window.resolveLocalFileSystemURL) {
+                window.resolveLocalFileSystemURL('file:///sdcard/', 
+                    (entry) => {
+                        this.hasPermission = true;
+                        this.permissionGranted();
+                    },
+                    (error) => {
+                        this.hasPermission = false;
+                        this.permissionDenied();
+                    }
+                );
+            } else if (window.AndroidAPI && window.AndroidAPI.checkPermission) {
+                // Bridge nativa do APK
+                const hasPerm = await window.AndroidAPI.checkPermission();
+                if (hasPerm) {
+                    this.hasPermission = true;
+                    this.permissionGranted();
+                } else {
+                    this.permissionDenied();
+                }
             } else {
-                this.hasPermission = false;
-                document.getElementById('status').innerHTML = "🔐 Aguardando permissão de armazenamento...";
+                // Fallback - tenta usar Input File
+                this.showFallbackOption();
             }
         } catch(e) {
-            console.log("Permissão não concedida ainda");
-            this.hasPermission = false;
+            console.log("Erro ao verificar permissão:", e);
+            this.permissionDenied();
         }
     },
 
-    // Pede permissão direto para o Android (via Intent)
+    permissionGranted() {
+        this.hasPermission = true;
+        document.getElementById('permissionArea').style.display = 'none';
+        document.getElementById('scanBtn').style.display = 'block';
+        document.getElementById('status').innerHTML = "✅ Permissão concedida! Clique em ESCANEAR para buscar suas músicas.";
+        document.getElementById('playlist').innerHTML = '<div style="text-align:center; padding:20px; color:var(--primary);">📀 Permissão OK! Clique em ESCANEAR MEMÓRIA 📀</div>';
+    },
+
+    permissionDenied() {
+        this.hasPermission = false;
+        document.getElementById('permissionArea').style.display = 'block';
+        document.getElementById('scanBtn').style.display = 'none';
+        document.getElementById('status').innerHTML = "🔐 É necessário conceder permissão de armazenamento para acessar suas músicas.";
+        document.getElementById('playlist').innerHTML = '<div style="text-align:center; padding:20px; color:#ffaa44;">⚠️ Clique em "CONCEDER PERMISSÃO" para continuar ⚠️</div>';
+    },
+
+    // Solicita permissão ao Android
     requestAndroidPermission() {
-        // Para APK Android - interface com o sistema
-        if (window.Android && window.Android.requestPermission) {
-            // Se tiver bridge nativa
-            window.Android.requestPermission();
-            document.getElementById('status').innerHTML = "📲 Solicitando permissão ao sistema...";
-            setTimeout(() => this.checkAndroidPermission(), 1000);
-        } 
-        else if (window.FileAPI && window.FileAPI.requestPermission) {
-            // Fallback para WebView com FileAPI
-            window.FileAPI.requestPermission();
-            document.getElementById('status').innerHTML = "📲 Verifique a janela de permissão do Android";
-            setTimeout(() => this.checkAndroidPermission(), 2000);
-        }
-        else {
-            // Para navegador normal - mostra instruções
-            alert("🔐 PERMISSÃO DE ARMAZENAMENTO\n\n" +
-                  "No ANDROID, vá em:\n" +
-                  "Configurações → Apps → Ben Music Pro → Permissões → Ativar 'Arquivos e Mídia'\n\n" +
-                  "Após ativar, recarregue o app e clique novamente em ESCANEAR.");
-        }
+        document.getElementById('status').innerHTML = "📲 Solicitando permissão ao sistema Android...";
         
-        // Tenta novamente em 2 segundos
-        setTimeout(() => {
-            this.checkAndroidPermission();
-        }, 3000);
-    },
-
-    // Escaneia todos os MP3 do Android
-    async scanMusicFiles() {
-        if (!this.hasPermission) {
-            alert("⚠️ Primeiro conceda permissão de armazenamento!");
+        // Método 1: Bridge nativa do APK
+        if (window.AndroidAPI && window.AndroidAPI.requestPermission) {
+            window.AndroidAPI.requestPermission();
+            setTimeout(() => this.checkPermission(), 2000);
             return;
         }
         
-        document.getElementById('status').innerHTML = "🔍 Escaneando toda a memória em busca de MP3...";
-        document.getElementById('playlist').innerHTML = '<div style="text-align:center; padding:20px; color:#a78bfa;">🔄 Buscando músicas no Android...🔄</div>';
+        // Método 2: Para WebView com permissão automática
+        if (window.Android && window.Android.requestStoragePermission) {
+            window.Android.requestStoragePermission();
+            setTimeout(() => this.checkPermission(), 2000);
+            return;
+        }
+        
+        // Método 3: Instruções para o usuário
+        alert("📱 PERMISSÃO DE ARMAZENAMENTO\n\n" +
+              "Para permitir o acesso às suas músicas:\n\n" +
+              "1. Vá em CONFIGURAÇÕES do Android\n" +
+              "2. APPS → Ben Music Pro\n" +
+              "3. PERMISSÕES → Ativar 'Arquivos e mídia'\n" +
+              "4. Volte ao app e clique em ESCANEAR\n\n" +
+              "Após ativar, recarregue o app.");
+        
+        // Verifica novamente em 5 segundos
+        setTimeout(() => this.checkPermission(), 5000);
+    },
+
+    // Método alternativo para navegadores comuns
+    showFallbackOption() {
+        document.getElementById('permissionArea').innerHTML = `
+            <h3>📁 SELECIONE A PASTA DE MÚSICAS</h3>
+            <p>Como o navegador não pede permissão automaticamente,<br>clique abaixo e selecione a pasta onde estão suas músicas.</p>
+            <button id="fallbackScanBtn" class="btn-permission">🎵 SELECIONAR PASTA DE MÚSICAS</button>
+        `;
+        document.getElementById('fallbackScanBtn').onclick = () => this.fallbackDirectoryPicker();
+    },
+
+    // Fallback para navegadores que suportam showDirectoryPicker
+    async fallbackDirectoryPicker() {
+        if (!window.showDirectoryPicker) {
+            alert("Seu navegador não suporta esta função. Use o Chrome no Android.");
+            return;
+        }
+        
+        try {
+            const dirHandle = await window.showDirectoryPicker();
+            document.getElementById('permissionArea').style.display = 'none';
+            document.getElementById('scanBtn').style.display = 'block';
+            document.getElementById('status').innerHTML = "📂 Pasta selecionada! Escaneando...";
+            await this.scanDirectoryHandle(dirHandle);
+        } catch(e) {
+            alert("Erro ao selecionar pasta. Tente novamente.");
+        }
+    },
+
+    // Escaneia todas as músicas do Android
+    async scanAllMusic() {
+        if (!this.hasPermission && !window.showDirectoryPicker) {
+            this.requestAndroidPermission();
+            return;
+        }
+        
+        if (this.isScanning) return;
+        this.isScanning = true;
+        
+        document.getElementById('status').innerHTML = "🔍 ESCANEANDO TODA A MEMÓRIA ANDROID...";
+        document.getElementById('progressBar').style.display = 'block';
+        document.getElementById('playlist').innerHTML = '<div style="text-align:center; padding:20px; color:#a78bfa;">🔄 Escaneando pastas em busca de MP3... Aguarde 🔄</div>';
         
         this.songs = [];
+        let totalFound = 0;
         
-        // Lista de pastas comuns no Android onde podem ter músicas
-        const commonPaths = [
+        // Pastas comuns do Android onde podem haver músicas
+        const musicPaths = [
             '/sdcard/Music/',
             '/sdcard/Músicas/',
             '/sdcard/Download/',
-            '/sdcard/media/',
-            '/sdcard/DCIM/',
-            '/sdcard/Movies/',
+            '/sdcard/media/audio/',
+            '/sdcard/DCIM/Camera/',
+            '/sdcard/WhatsApp/Media/WhatsApp Audio/',
             '/sdcard/Alarms/',
             '/sdcard/Ringtones/',
             '/sdcard/Notifications/',
-            '/sdcard/Podcasts/',
             '/storage/emulated/0/Music/',
-            '/storage/emulated/0/Download/'
+            '/storage/emulated/0/Download/',
+            '/storage/emulated/0/Media/'
         ];
         
-        let totalFound = 0;
-        
-        // Função para escanear cada pasta (usando entrada de arquivo)
-        const scanDirectory = (path) => {
+        // Função para escanear usando resolveLocalFileSystemURL
+        const scanPath = (path) => {
             return new Promise((resolve) => {
-                try {
-                    window.resolveLocalFileSystemURL(path, 
-                        (directoryEntry) => {
-                            const reader = directoryEntry.createReader();
-                            reader.readEntries((entries) => {
-                                entries.forEach(entry => {
-                                    if (entry.isFile && /\.(mp3|MP3|wav|WAV|ogg|m4a)$/i.test(entry.name)) {
-                                        entry.file((file) => {
+                if (!window.resolveLocalFileSystemURL) {
+                    resolve(false);
+                    return;
+                }
+                
+                window.resolveLocalFileSystemURL(path,
+                    (dirEntry) => {
+                        const reader = dirEntry.createReader();
+                        reader.readEntries((entries) => {
+                            entries.forEach(entry => {
+                                if (entry.isFile && /\.(mp3|MP3|wav|WAV|ogg|OGG|m4a|M4A|flac|FLAC)$/i.test(entry.name)) {
+                                    entry.file((file) => {
+                                        if (file.size > 0 && file.size < 50 * 1024 * 1024) {
                                             this.songs.push({
                                                 name: entry.name,
                                                 data: file,
@@ -179,21 +250,142 @@ const playerApp = {
                                             });
                                             totalFound++;
                                             document.getElementById('status').innerHTML = `🎵 Encontradas ${totalFound} músicas...`;
+                                            document.getElementById('progressFill').style.width = 
+                                                Math.min((totalFound / 500) * 100, 90) + '%';
                                             this.updatePlaylist();
-                                        });
-                                    } else if (entry.isDirectory && !entry.name.startsWith('.')) {
-                                        // Escaneia subpastas (apenas 1 nível para performance)
-                                        const subReader = entry.createReader();
-                                        subReader.readEntries((subEntries) => {
-                                            subEntries.forEach(subEntry => {
-                                                if (subEntry.isFile && /\.(mp3|MP3)$/i.test(subEntry.name)) {
-                                                    subEntry.file((file) => {
+                                        }
+                                    });
+                                } else if (entry.isDirectory && !entry.name.startsWith('.') && 
+                                          entry.name !== 'Android' && entry.name !== 'data') {
+                                    // Escaneia subpastas
+                                    const subReader = entry.createReader();
+                                    subReader.readEntries((subEntries) => {
+                                        subEntries.forEach(subEntry => {
+                                            if (subEntry.isFile && /\.(mp3|MP3)$/i.test(subEntry.name)) {
+                                                subEntry.file((file) => {
+                                                    if (file.size > 0) {
                                                         this.songs.push({
                                                             name: subEntry.name,
                                                             data: file,
                                                             path: subEntry.fullPath
                                                         });
                                                         totalFound++;
+                                                        document.getElementById('status').innerHTML = `🎵 Encontradas ${totalFound} músicas...`;
+                                                        this.updatePlaylist();
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    });
+                                }
+                            });
+                            resolve(true);
+                        }, () => resolve(false));
+                    },
+                    () => resolve(false)
+                );
+            });
+        };
+        
+        // Escaneia todas as pastas
+        for (const path of musicPaths) {
+            await scanPath(path);
+        }
+        
+        document.getElementById('progressFill').style.width = '100%';
+        document.getElementById('progressBar').style.display = 'none';
+        this.isScanning = false;
+        
+        if (this.songs.length === 0) {
+            document.getElementById('playlist').innerHTML = `
+                <div style="text-align:center; padding:20px;">
+                    ⚠️ NENHUMA MÚSICA ENCONTRADA!<br><br>
+                    <strong>🔧 Soluções:</strong><br>
+                    • Verifique se suas músicas estão na pasta Music ou Download<br>
+                    • Conceda permissão de armazenamento nas configurações do app<br>
+                    • Certifique-se de que os arquivos são .mp3<br>
+                    • Reinicie o app após dar a permissão
+                </div>
+            `;
+            document.getElementById('status').innerHTML = `⚠️ 0 músicas encontradas. Verifique as pastas.`;
+        } else {
+            document.getElementById('status').innerHTML = `✅ ${this.songs.length} músicas encontradas! Toque em qualquer faixa para reproduzir.`;
+        }
+        
+        document.getElementById('scanBtn').innerHTML = `🔍 ESCANEAR NOVAMENTE (${this.songs.length} músicas)`;
+    },
+
+    // Escaneia via DirectoryHandle (fallback)
+    async scanDirectoryHandle(handle) {
+        document.getElementById('status').innerHTML = "🔍 Escaneando pasta selecionada...";
+        this.songs = [];
+        
+        const recursiveScan = async (h) => {
+            for await (const entry of h.values()) {
+                if (entry.kind === 'file' && /\.(mp3|wav|ogg|m4a)$/i.test(entry.name)) {
+                    const file = await entry.getFile();
+                    this.songs.push({ name: entry.name, data: file });
+                    this.updatePlaylist();
+                } else if (entry.kind === 'directory') {
+                    await recursiveScan(entry);
+                }
+            }
+        };
+        
+        await recursiveScan(handle);
+        
+        if (this.songs.length === 0) {
+            document.getElementById('playlist').innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Nenhum MP3 encontrado nesta pasta</div>';
+        } else {
+            document.getElementById('status').innerHTML = `✅ ${this.songs.length} músicas carregadas!`;
+        }
+        
+        document.getElementById('scanBtn').style.display = 'block';
+        document.getElementById('permissionArea').style.display = 'none';
+    },
+
+    updatePlaylist() {
+        if (this.songs.length === 0) return;
+        
+        const playlistDiv = document.getElementById('playlist');
+        playlistDiv.innerHTML = `<div style="padding:8px; font-size:12px; color:var(--primary);">📀 ${this.songs.length} músicas encontradas</div>`;
+        
+        this.songs.sort((a, b) => a.name.localeCompare(b.name));
+        
+        this.songs.forEach((song, idx) => {
+            const div = document.createElement('div');
+            div.className = 'track';
+            let cleanName = song.name.replace(/\.(mp3|wav|ogg|m4a|flac|MP3|WAV|OGG|M4A|FLAC)$/i, '');
+            if (cleanName.length > 50) cleanName = cleanName.substring(0, 47) + "...";
+            
+            div.innerText = `${idx + 1}. ${cleanName}`;
+            div.title = song.name;
+            
+            div.onclick = () => {
+                try {
+                    if (this.audio.src) URL.revokeObjectURL(this.audio.src);
+                    const url = URL.createObjectURL(song.data);
+                    this.audio.src = url;
+                    this.audio.play().catch(e => console.log("Autoplay:", e));
+                    document.getElementById('title').innerHTML = `🎵 ${cleanName}`;
+                    
+                    document.querySelectorAll('.track').forEach(t => t.classList.remove('active'));
+                    div.classList.add('active');
+                    document.getElementById('status').innerHTML = `🎧 Tocando: ${cleanName}`;
+                } catch(e) {
+                    console.log("Erro ao tocar:", e);
+                }
+            };
+            playlistDiv.appendChild(div);
+        });
+    }
+};
+
+// Inicia a aplicação
+playerApp.init();
+</script>
+</body>
+</html>                              totalFound++;
                                                         document.getElementById('status').innerHTML = `🎵 Encontradas ${totalFound} músicas...`;
                                                         this.updatePlaylist();
                                                     });
