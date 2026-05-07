@@ -3,402 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Ben Music Pro - Player Avançado</title>
-    <meta name="theme-color" content="#7c3aed">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>Ben Music Pro - Update</title>
     <style>
         :root {
-            --bg: #0f0f14;
-            --card: #1a1a22;
-            --primary: #7c3aed;
-            --primary-glow: rgba(124, 58, 237, 0.5);
-            --text: #e5e7eb;
-            --text-muted: #9ca3af;
-            --border: #2d2d3a;
-            --transition: all 0.3s ease;
+            --bg: #0f0f14; --card: #1a1a22; --primary: #7c3aed;
+            --text: #e5e7eb; --text-muted: #9ca3af; --border: #2d2d3a;
         }
-
-        [data-theme="light"] {
-            --bg: #f3f4f6;
-            --card: #ffffff;
-            --text: #111827;
-            --text-muted: #6b7280;
-            --border: #e5e7eb;
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-            transition: background 0.3s ease;
-        }
-
-        .app { width: 100%; max-width: 450px; display: flex; flex-direction: column; gap: 20px; }
-
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; padding: 20px; }
+        
         .player-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 32px;
-            padding: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            position: relative;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 24px; padding: 20px; text-align: center;
         }
 
-        .cover-area {
-            width: 100%;
-            aspect-ratio: 1;
-            background: linear-gradient(135deg, #2d2d3a, #111);
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 24px;
-        }
-
-        .visualizer {
-            display: flex;
-            align-items: flex-end;
-            gap: 3px;
-            height: 60px;
-            position: absolute;
-            bottom: 20px;
-        }
-
-        .bar { width: 4px; background: var(--primary); border-radius: 2px; }
-
-        .song-info h2 { font-size: 1.3rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .song-info p { color: var(--text-muted); font-size: 0.9rem; }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: var(--border);
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 20px 0 5px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary);
-            width: 0%;
-            border-radius: 4px;
-            box-shadow: 0 0 10px var(--primary-glow);
-        }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 20px 0;
-        }
-
-        .btn-play {
-            width: 65px;
-            height: 65px;
-            background: var(--primary);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            border: none;
-            box-shadow: 0 10px 20px var(--primary-glow);
-            cursor: pointer;
-        }
-
-        .scan-overlay {
-            font-size: 12px;
-            color: var(--primary);
-            text-align: center;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .playlist {
-            max-height: 250px;
-            overflow-y: auto;
-            border-radius: 15px;
-            background: rgba(0,0,0,0.05);
-        }
-
-        .track-item {
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-        }
-
-        .track-item.active {
-            background: rgba(124, 58, 237, 0.1);
-            color: var(--primary);
-            font-weight: 600;
+        .status-badge {
+            font-size: 11px; padding: 5px 10px; border-radius: 20px;
+            background: rgba(124, 58, 237, 0.2); color: var(--primary);
+            display: inline-block; margin-bottom: 15px;
         }
 
         #scanBtn {
-            width: 100%;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 16px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: var(--transition);
+            width: 100%; background: var(--primary); color: white;
+            border: none; padding: 16px; border-radius: 12px;
+            font-weight: bold; cursor: pointer; margin: 15px 0;
         }
 
-        #scanBtn:active { transform: scale(0.98); }
+        .playlist {
+            margin-top: 20px; max-height: 300px; overflow-y: auto;
+            border-radius: 10px; background: rgba(0,0,0,0.2);
+        }
 
-        /* Banner Original Preservado */
-        @keyframes flamePulseCustom { from { transform: scale(0.96); box-shadow: 0 0 20px #ff4400; } to { transform: scale(1); box-shadow: 0 0 40px #ff4400; } }
+        .track {
+            padding: 12px; border-bottom: 1px solid var(--border);
+            font-size: 13px; display: flex; align-items: center; gap: 10px;
+        }
+
+        .active { background: rgba(124, 58, 237, 0.1); color: var(--primary); }
+
+        /* Banner Flame Neon (Preservado) */
+        @keyframes flamePulse { from { transform: scale(0.96); } to { transform: scale(1); } }
     </style>
 </head>
 <body>
 
-<div id="flameNeonPopup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, rgba(0,0,0,0.95) 0%, #000000 100%); backdrop-filter: blur(10px); z-index: 20000; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', system-ui, sans-serif; transition: opacity 0.4s ease; cursor: pointer;">
-    <div style="background: #0a0a0c; border-radius: 56px; padding: 2rem 2.5rem; text-align: center; max-width: 90%; width: 560px; border: 2px solid rgba(255, 70, 0, 0.9); box-shadow: 0 0 30px #ff4400; animation: flamePulseCustom 1.1s infinite alternate;">
-        <div style="font-size: 2.5rem; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; background: linear-gradient(135deg, #ff7300, #ffdd00, #ff4500, #ff8c00); -webkit-background-clip: text; background-clip: text; color: transparent;">✦ IGNIS ✦</div>
-        <div style="color: #ffb347; margin: 15px 0;">CREATED BY</div>
-        <div style="color: #fff; font-weight: 800; font-size: 1.5rem;">VANDENSON LIMA PINHEIRO</div>
-        <div id="neonTimerProgress" style="width: 100%; height: 6px; background: #ff4400; margin-top: 20px; border-radius: 10px;"></div>
+<div id="flameNeonPopup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+    <div style="background: #0a0a0c; border-radius: 40px; padding: 2rem; text-align: center; border: 2px solid #ff4600; animation: flamePulse 1.1s infinite alternate;">
+        <div style="font-size: 2rem; font-weight: 900; color: #ff7300;">✦ IGNIS ✦</div>
+        <div style="color: #ffb347; margin: 10px 0;">CREATED BY</div>
+        <div style="color: #fff; font-weight: 800; font-size: 1.2rem;">VANDENSON LIMA PINHEIRO</div>
     </div>
 </div>
 
 <div class="app">
-    <div class="header" style="display:flex; justify-content:space-between; align-items:center;">
-        <h1>Ben Music</h1>
-        <button id="themeBtn" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">🌓</button>
-    </div>
-
     <div class="player-card">
-        <div class="cover-area">
-            <span style="font-size: 5rem;">🎵</span>
-            <div class="visualizer" id="visualizer"></div>
-        </div>
-
-        <div id="scanStatus" class="scan-overlay">Aguardando permissão de pasta...</div>
-
-        <div class="song-info">
-            <h2 id="trackTitle">Nenhuma Música</h2>
-            <p id="trackArtist">Memória Principal Android</p>
-        </div>
-
-        <div class="progress-bar" id="progressArea">
-            <div class="progress-fill" id="progressBar"></div>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted);">
-            <span id="currentTime">0:00</span>
-            <span id="durationTime">0:00</span>
-        </div>
-
-        <div class="controls">
-            <button id="prevBtn" style="background:none; border:none; color:inherit; font-size:1.5rem;">⏮</button>
-            <button class="btn-play" id="playBtn">▶</button>
-            <button id="nextBtn" style="background:none; border:none; color:inherit; font-size:1.5rem;">⏭</button>
+        <div class="status-badge" id="scanStatus">Aguardando Varredura</div>
+        <h2 id="currentTrack" style="font-size: 1.1rem; margin-bottom: 10px;">Pronto para atualizar</h2>
+        
+        <div style="display:flex; justify-content:center; gap:20px; margin: 15px 0;">
+            <button onclick="updatePlayer.prev()" style="background:none; border:none; color:white; font-size:20px;">⏮</button>
+            <button id="playBtn" onclick="updatePlayer.toggle()" style="width:50px; height:50px; border-radius:50%; background:var(--primary); border:none; color:white;">▶</button>
+            <button onclick="updatePlayer.next()" style="background:none; border:none; color:white; font-size:20px;">⏭</button>
         </div>
     </div>
 
-    <button id="scanBtn">🔍 ESCANEAR MEMÓRIA ANDROID</button>
-
-    <div class="playlist" id="playlistItems"></div>
+    <button id="scanBtn">🔄 REESCANEAR MEMÓRIA E ATUALIZAR</button>
+    
+    <div class="playlist" id="playlist"></div>
 </div>
 
-<audio id="mainAudio"></audio>
+<audio id="audioMain"></audio>
 
 <script>
-/**
- * CORE ENGINE - BEN MUSIC PRO
- */
-const Player = {
-    audio: document.getElementById('mainAudio'),
-    playlist: [],
+const updatePlayer = {
+    audio: document.getElementById('audioMain'),
+    songs: [],
     currentIndex: 0,
     db: null,
 
     async init() {
-        await this.initDB();
-        this.setupEvents();
-        this.createVisualizer();
-        this.autoRestore(); // Memória automática ao abrir
+        this.db = await this.setupDB();
+        this.setupUI();
+        this.autoLoad(); // Memória automática ao abrir o APK
     },
 
-    async initDB() {
+    setupDB() {
         return new Promise(res => {
-            const req = indexedDB.open("BenMusicAndroid", 3);
-            req.onupgradeneeded = e => {
-                const db = e.target.result;
-                if (!db.objectStoreNames.contains("config")) db.createObjectStore("config");
-            };
-            req.onsuccess = e => { this.db = e.target.result; res(); };
+            const req = indexedDB.open("BenMusicUpdateDB", 1);
+            req.onupgradeneeded = e => e.target.result.createObjectStore("settings");
+            req.onsuccess = e => res(e.target.result);
         });
     },
 
-    setupEvents() {
-        document.getElementById('scanBtn').onclick = () => this.requestAccess();
-        document.getElementById('playBtn').onclick = () => this.togglePlay();
-        document.getElementById('nextBtn').onclick = () => this.next();
-        document.getElementById('prevBtn').onclick = () => this.prev();
-        
-        this.audio.ontimeupdate = () => {
-            if (isNaN(this.audio.duration)) return;
-            const pct = (this.audio.currentTime / this.audio.duration) * 100;
-            document.getElementById('progressBar').style.width = pct + '%';
-            document.getElementById('currentTime').innerText = this.formatTime(this.audio.currentTime);
-            document.getElementById('durationTime').innerText = this.formatTime(this.audio.duration);
-        };
-
+    setupUI() {
+        document.getElementById('scanBtn').onclick = () => this.requestStorageAccess();
         this.audio.onended = () => this.next();
-
-        document.getElementById('progressArea').onclick = (e) => {
-            const rect = e.target.getBoundingClientRect();
-            const pct = (e.clientX - rect.left) / rect.width;
-            this.audio.currentTime = pct * this.audio.duration;
-        };
-
-        document.getElementById('themeBtn').onclick = () => {
-            const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', t);
-        };
-    },
-
-    async requestAccess() {
-        try {
-            // Solicita ao usuário selecionar a pasta raiz do Android ou Music
-            const handle = await window.showDirectoryPicker({ mode: 'read' });
-            
-            // Salva o "atalho" da pasta no IndexedDB para abrir depois sem pedir de novo
-            const tx = this.db.transaction("config", "readwrite");
-            tx.objectStore("config").put(handle, "folderHandle");
-            
-            await this.scanFolder(handle);
-        } catch (err) {
-            console.error(err);
-            alert("É necessário conceder permissão à pasta para listar as músicas.");
-        }
-    },
-
-    async autoRestore() {
-        const tx = this.db.transaction("config", "readonly");
-        const handle = await tx.objectStore("config").get("folderHandle");
         
-        if (handle) {
-            // Verifica se a permissão ainda é válida (navegador costuma manter por sessão)
-            if (await handle.queryPermission() === 'granted') {
-                await this.scanFolder(handle);
-            } else {
-                document.getElementById('scanStatus').innerText = "Clique em Escanear para reativar.";
-            }
+        // Esconder banner
+        const banner = document.getElementById('flameNeonPopup');
+        banner.onclick = () => banner.style.display = 'none';
+        setTimeout(() => banner.style.display = 'none', 6000);
+    },
+
+    // Pede permissão para a pasta raiz (APK mode)
+    async requestStorageAccess() {
+        try {
+            const handle = await window.showDirectoryPicker();
+            
+            // Salva o "Handle" (permissão) no banco de dados do app
+            const tx = this.db.transaction("settings", "readwrite");
+            tx.objectStore("settings").put(handle, "rootFolder");
+            
+            await this.performScan(handle);
+        } catch (e) {
+            console.error("Permissão negada");
         }
     },
 
-    async scanFolder(directoryHandle) {
-        document.getElementById('scanStatus').innerText = "Vasculhando memória...";
-        this.playlist = [];
-        const container = document.getElementById('playlistItems');
-        container.innerHTML = "";
+    // Varredura completa da memória Android
+    async performScan(handle) {
+        document.getElementById('scanStatus').innerText = "Atualizando biblioteca...";
+        this.songs = [];
+        const listUI = document.getElementById('playlist');
+        listUI.innerHTML = "";
 
-        const readEntries = async (handle) => {
-            for await (const entry of handle.values()) {
-                if (entry.kind === 'file') {
+        const scan = async (h) => {
+            for await (const entry of h.values()) {
+                if (entry.kind === 'file' && entry.name.match(/\.(mp3|wav|m4a|ogg)$/i)) {
                     const file = await entry.getFile();
-                    if (file.type.startsWith('audio/')) {
-                        const track = { name: file.name, data: file };
-                        this.playlist.push(track);
-                        this.addTrackToUI(track.name, this.playlist.length - 1);
-                    }
+                    this.songs.push({ name: entry.name, data: file });
+                    this.renderTrack(entry.name, this.songs.length - 1);
                 } else if (entry.kind === 'directory') {
-                    await readEntries(entry); // Busca em subpastas
+                    await scan(entry);
                 }
             }
         };
 
-        await readEntries(directoryHandle);
-        document.getElementById('scanStatus').innerText = `${this.playlist.length} músicas carregadas.`;
-        if (this.playlist.length > 0) this.loadTrack(0, false);
+        await scan(handle);
+        document.getElementById('scanStatus').innerText = `${this.songs.length} Músicas encontradas`;
+        if (this.songs.length > 0) this.playTrack(0, false);
     },
 
-    loadTrack(index, play = true) {
-        this.currentIndex = index;
-        const track = this.playlist[index];
+    // Memória para quando sair do app (Recupera ao abrir)
+    async autoLoad() {
+        const tx = this.db.transaction("settings", "readonly");
+        const handle = await tx.objectStore("settings").get("rootFolder");
         
-        // Revogar URL antiga para liberar memória do Android
-        if (this.audio.src) URL.revokeObjectURL(this.audio.src);
+        if (handle) {
+            // Verifica se o Android ainda permite o acesso
+            const permission = await handle.queryPermission();
+            if (permission === 'granted') {
+                this.performScan(handle);
+            } else {
+                document.getElementById('scanStatus').innerText = "Toque em Atualizar para sincronizar";
+            }
+        }
+    },
+
+    playTrack(i, autoPlay = true) {
+        this.currentIndex = i;
+        if(this.audio.src) URL.revokeObjectURL(this.audio.src);
         
-        this.audio.src = URL.createObjectURL(track.data);
-        document.getElementById('trackTitle').innerText = track.name;
+        this.audio.src = URL.createObjectURL(this.songs[i].data);
+        document.getElementById('currentTrack').innerText = this.songs[i].name;
         
-        this.updateUI();
-        if (play) this.audio.play();
-    },
-
-    addTrackToUI(name, index) {
-        const item = document.createElement('div');
-        item.className = 'track-item';
-        item.id = `t-${index}`;
-        item.innerHTML = `<span>${index + 1}</span> <span>${name}</span>`;
-        item.onclick = () => this.loadTrack(index);
-        document.getElementById('playlistItems').appendChild(item);
-    },
-
-    updateUI() {
-        document.querySelectorAll('.track-item').forEach(el => el.classList.remove('active'));
-        document.getElementById(`t-${this.currentIndex}`)?.classList.add('active');
-    },
-
-    togglePlay() {
-        if (this.audio.paused) {
+        document.querySelectorAll('.track').forEach(t => t.classList.remove('active'));
+        document.getElementById(`t-${i}`).classList.add('active');
+        
+        if(autoPlay) {
             this.audio.play();
-            document.getElementById('playBtn').innerText = '⏸';
+            document.getElementById('playBtn').innerText = "⏸";
+        }
+    },
+
+    renderTrack(name, i) {
+        const div = document.createElement('div');
+        div.className = 'track';
+        div.id = `t-${i}`;
+        div.innerHTML = `<span style="opacity:0.5">${i+1}</span> ${name}`;
+        div.onclick = () => this.playTrack(i);
+        document.getElementById('playlist').appendChild(div);
+    },
+
+    toggle() {
+        if(this.audio.paused) {
+            this.audio.play();
+            document.getElementById('playBtn').innerText = "⏸";
         } else {
             this.audio.pause();
-            document.getElementById('playBtn').innerText = '▶';
+            document.getElementById('playBtn').innerText = "▶";
         }
     },
 
-    next() { this.loadTrack((this.currentIndex + 1) % this.playlist.length); },
-    prev() { this.loadTrack((this.currentIndex - 1 + this.playlist.length) % this.playlist.length); },
-
-    formatTime(s) {
-        const m = Math.floor(s / 60);
-        const sec = Math.floor(s % 60);
-        return `${m}:${sec < 10 ? '0' : ''}${sec}`;
-    },
-
-    createVisualizer() {
-        const vis = document.getElementById('visualizer');
-        for (let i = 0; i < 20; i++) {
-            const b = document.createElement('div');
-            b.className = 'bar';
-            b.style.height = '4px';
-            vis.appendChild(b);
-        }
-    }
+    next() { if(this.songs.length) this.playTrack((this.currentIndex + 1) % this.songs.length); },
+    prev() { if(this.songs.length) this.playTrack((this.currentIndex - 1 + this.songs.length) % this.songs.length); }
 };
 
-Player.init();
-
-// Lógica de fechamento do Banner
-const popup = document.getElementById('flameNeonPopup');
-if(popup) {
-    popup.onclick = () => popup.remove();
-    setTimeout(() => { 
-        popup.style.opacity = '0'; 
-        setTimeout(() => popup.remove(), 500); 
-    }, 15000);
-}
+updatePlayer.init();
 </script>
 </body>
 </html>
