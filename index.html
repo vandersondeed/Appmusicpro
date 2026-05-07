@@ -4,16 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Ben Music Pro</title>
-    <!-- Estilo de App da Play Store -->
     <style>
         :root {
             --bg: #09090b;
             --card: #18181b;
             --primary: #8b5cf6;
-            --primary-light: #a78bfa;
             --text-main: #fafafa;
             --text-dim: #a1a1aa;
-            --accent: #22c55e;
+            --accent: #ef4444; /* Cor para o botão de apagar */
+            --success: #22c55e;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -28,242 +27,235 @@
             overflow: hidden;
         }
 
-        /* Splash Screen Profissional */
+        /* Splash Screen */
         #splash {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 10000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .ignis-logo {
-            border: 2px solid #ff4600;
-            padding: 20px 40px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(255, 70, 0, 0.2);
+            transition: all 0.6s ease;
         }
 
-        /* Layout Principal */
+        /* Layout */
         .app-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            gap: 20px;
-            max-width: 500px;
-            margin: 0 auto;
-            width: 100%;
+            flex: 1; display: flex; flex-direction: column;
+            padding: 20px; gap: 15px; max-width: 500px; margin: 0 auto; width: 100%;
         }
 
-        /* Player Card Estilo Glassmorphism */
         .player-card {
             background: linear-gradient(145deg, #1e1e2e, #111118);
-            border-radius: 32px;
-            padding: 30px;
+            border-radius: 32px; padding: 25px; text-align: center;
             border: 1px solid rgba(255,255,255,0.05);
-            text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
 
         .album-art {
-            width: 160px; height: 160px;
-            background: linear-gradient(135deg, var(--primary), #4c1d95);
-            margin: 0 auto 20px;
-            border-radius: 24px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 60px;
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+            width: 120px; height: 120px; background: linear-gradient(135deg, var(--primary), #4c1d95);
+            margin: 0 auto 15px; border-radius: 24px; display: flex; 
+            align-items: center; justify-content: center; font-size: 50px;
         }
 
-        h2 { font-size: 1.4rem; margin-bottom: 4px; font-weight: 700; }
-        .artist { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px; }
-
-        /* Controles de Progresso */
-        .progress-area { width: 100%; margin-bottom: 20px; }
+        /* Controls */
         .progress-bar {
             width: 100%; height: 6px; background: #333;
-            border-radius: 10px; overflow: hidden; cursor: pointer;
+            border-radius: 10px; margin: 15px 0 5px; overflow: hidden;
         }
-        .progress-fill {
-            width: 0%; height: 100%; background: var(--primary);
-            transition: width 0.1s linear;
-        }
-        .time-info {
-            display: flex; justify-content: space-between;
-            font-size: 11px; color: var(--text-dim); margin-top: 8px;
-        }
+        .progress-fill { width: 0%; height: 100%; background: var(--primary); }
 
-        /* Botões de Ação */
-        .main-controls {
-            display: flex; align-items: center; justify-content: center; gap: 30px;
-        }
-        .btn-circle {
-            background: none; border: none; color: white; cursor: pointer; transition: 0.2s;
-        }
+        .main-controls { display: flex; align-items: center; justify-content: center; gap: 25px; margin-top: 10px; }
         .play-pause {
-            width: 70px; height: 70px; background: var(--primary);
+            width: 60px; height: 60px; background: var(--primary);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 30px; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+            font-size: 25px; border: none; color: white;
         }
 
-        /* Lista de Músicas */
-        .playlist-section {
-            flex: 1; display: flex; flex-direction: column; gap: 10px; overflow: hidden;
+        /* Playlist Section */
+        .list-container {
+            flex: 1; display: flex; flex-direction: column; overflow: hidden;
+            background: var(--card); border-radius: 24px; border: 1px solid #27272a;
         }
-        .search-bar {
-            background: var(--card); border: 1px solid #27272a;
-            padding: 14px 20px; border-radius: 16px; color: white; outline: none;
-        }
-        .playlist {
-            flex: 1; overflow-y: auto; background: var(--card);
-            border-radius: 24px; border: 1px solid #27272a;
-        }
-        .track-item {
-            padding: 15px 20px; border-bottom: 1px solid #27272a;
-            display: flex; align-items: center; gap: 15px; cursor: pointer;
-        }
-        .track-item:active { background: #27272a; }
-        .track-item.active { border-left: 4px solid var(--primary); background: rgba(139, 92, 246, 0.1); }
+        .list-header { padding: 15px; border-bottom: 1px solid #27272a; display: flex; justify-content: space-between; align-items: center; }
         
-        .btn-add-music {
-            background: var(--accent); color: white; border: none;
-            padding: 16px; border-radius: 18px; font-weight: 800;
-            font-size: 14px; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+        .playlist { flex: 1; overflow-y: auto; }
+        .track-item {
+            padding: 12px 15px; border-bottom: 1px solid #27272a;
+            display: flex; align-items: center; gap: 12px; cursor: pointer;
         }
+        .track-item.active { background: rgba(139, 92, 246, 0.1); border-left: 4px solid var(--primary); }
+
+        /* Buttons */
+        .btn-add { background: var(--success); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: bold; width: 100%; }
+        .btn-clear { background: none; border: none; color: var(--accent); font-size: 12px; cursor: pointer; }
+        
+        #loading-status { font-size: 10px; color: var(--primary); margin-top: 5px; }
     </style>
 </head>
 <body>
 
 <div id="splash">
-    <div class="ignis-logo">
+    <div style="border: 2px solid #ff4600; padding: 20px 40px; border-radius: 20px; text-align: center;">
         <h1 style="color: #ff4600; letter-spacing: 4px;">✦ IGNIS ✦</h1>
-        <p style="color: #666; font-size: 12px; margin-top: 5px;">VANDENSON LIMA PINHEIRO</p>
+        <p style="color: #666; font-size: 10px;">VANDENSON LIMA PINHEIRO</p>
     </div>
 </div>
 
 <div class="app-content">
     <div class="player-card">
         <div class="album-art" id="art">🎵</div>
-        <h2 id="now-title">Ben Music Pro</h2>
-        <p class="artist" id="now-artist">Pronto para tocar</p>
+        <h2 id="title" style="font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Ben Music Pro</h2>
+        <p id="artist" style="color: var(--text-dim); font-size: 0.8rem;">Sua biblioteca offline</p>
 
-        <div class="progress-area">
-            <div class="progress-bar" id="p-root">
-                <div class="progress-fill" id="p-fill"></div>
-            </div>
-            <div class="time-info">
-                <span id="t-cur">0:00</span>
-                <span id="t-dur">0:00</span>
-            </div>
-        </div>
-
+        <div class="progress-bar"><div class="progress-fill" id="p-fill"></div></div>
         <div class="main-controls">
-            <button class="btn-circle" style="font-size: 24px;" onclick="core.prev()">⏮</button>
-            <button class="btn-circle play-pause" onclick="core.toggle()" id="btn-toggle">▶</button>
-            <button class="btn-circle" style="font-size: 24px;" onclick="core.next()">⏭</button>
+            <button style="background:none; border:none; color:white; font-size:20px;" onclick="core.prev()">⏮</button>
+            <button class="play-pause" onclick="core.toggle()" id="btn-play">▶</button>
+            <button style="background:none; border:none; color:white; font-size:20px;" onclick="core.next()">⏭</button>
         </div>
     </div>
 
-    <button class="btn-add-music" onclick="document.getElementById('f-input').click()">
-        📥 IMPORTAR MÚSICAS DO CELULAR
-    </button>
+    <button class="btn-add" onclick="document.getElementById('f-input').click()">📥 ADICIONAR MÚSICAS</button>
     <input type="file" id="f-input" multiple accept="audio/*" style="display: none;">
 
-    <div class="playlist-section">
-        <input type="text" class="search-bar" id="search" placeholder="🔍 Buscar na sua biblioteca...">
-        <div class="playlist" id="playlist-list">
-            <div style="padding: 40px; text-align: center; color: #71717a;">
-                Sua lista está vazia.
-            </div>
+    <div class="list-container">
+        <div class="list-header">
+            <span style="font-weight: bold; font-size: 14px;">Minhas Músicas</span>
+            <button class="btn-clear" onclick="core.clearLibrary()">Limpar Biblioteca</button>
         </div>
+        <div id="loading-status" style="text-align: center; display: none;">Carregando memória...</div>
+        <div class="playlist" id="playlist-box"></div>
     </div>
 </div>
 
-<audio id="player-engine"></audio>
+<audio id="audio"></audio>
 
 <script>
+// Gerenciador de Banco de Dados (IndexedDB)
+const dbName = "BenMusicDB";
+const storeName = "songs";
+
 const core = {
-    audio: document.getElementById('player-engine'),
+    audio: document.getElementById('audio'),
     list: [],
     idx: -1,
+    db: null,
 
-    init() {
+    async init() {
+        // Splash Screen
         setTimeout(() => {
             document.getElementById('splash').style.opacity = '0';
             setTimeout(() => document.getElementById('splash').style.display = 'none', 600);
         }, 2000);
 
-        document.getElementById('f-input').onchange = (e) => this.load(e.target.files);
-        document.getElementById('search').oninput = (e) => this.render(e.target.value);
-        this.audio.ontimeupdate = () => this.sync();
+        // Inicializar Banco de Dados
+        const request = indexedDB.open(dbName, 1);
+        request.onupgradeneeded = (e) => {
+            e.target.result.createObjectStore(storeName, { keyPath: "id", autoIncrement: true });
+        };
+        request.onsuccess = (e) => {
+            this.db = e.target.result;
+            this.loadFromMemory(); // Carregar músicas salvas ao iniciar
+        };
+
+        // Eventos
+        document.getElementById('f-input').onchange = (e) => this.handleFiles(e.target.files);
+        this.audio.ontimeupdate = () => {
+            const p = (this.audio.currentTime / this.audio.duration) * 100;
+            document.getElementById('p-fill').style.width = p + '%';
+        };
         this.audio.onended = () => this.next();
-        
-        document.getElementById('p-root').onclick = (e) => {
-            const r = e.currentTarget.getBoundingClientRect();
-            this.audio.currentTime = ((e.clientX - r.left) / r.width) * this.audio.duration;
+    },
+
+    // Salvar arquivos na memória do Android
+    async handleFiles(files) {
+        document.getElementById('loading-status').style.display = 'block';
+        document.getElementById('loading-status').innerText = "Salvando na memória...";
+
+        const tx = this.db.transaction(storeName, "readwrite");
+        const store = tx.objectStore(storeName);
+
+        for (let file of files) {
+            const songData = {
+                name: file.name.replace(/\.[^/.]+$/, "").replace(/_/g, " "),
+                data: file // O arquivo Blob é salvo diretamente
+            };
+            store.add(songData);
+        }
+
+        tx.oncomplete = () => {
+            this.loadFromMemory();
         };
     },
 
-    load(files) {
-        const items = Array.from(files).map(f => ({
-            title: f.name.replace(/\.[^/.]+$/, "").replace(/_/g, " "),
-            url: URL.createObjectURL(f),
-            file: f
-        }));
-        this.list = [...this.list, ...items].sort((a,b) => a.title.localeCompare(b.title));
-        this.render();
+    // Carregar músicas da memória
+    loadFromMemory() {
+        document.getElementById('loading-status').style.display = 'block';
+        const tx = this.db.transaction(storeName, "readonly");
+        const store = tx.objectStore(storeName);
+        const request = store.getAll();
+
+        request.onsuccess = () => {
+            this.list = request.result;
+            this.render();
+            document.getElementById('loading-status').style.display = 'none';
+        };
     },
 
-    render(query = '') {
-        const box = document.getElementById('playlist-list');
-        box.innerHTML = '';
-        const filtered = this.list.filter(t => t.title.toLowerCase().includes(query.toLowerCase()));
+    render() {
+        const box = document.getElementById('playlist-box');
+        box.innerHTML = this.list.length === 0 ? 
+            '<div style="padding:40px; text-align:center; color:#555;">Nenhuma música salva.</div>' : '';
 
-        filtered.forEach((t, i) => {
+        this.list.forEach((t, i) => {
             const d = document.createElement('div');
-            d.className = `track-item ${this.idx === this.list.indexOf(t) ? 'active' : ''}`;
+            d.className = `track-item ${this.idx === i ? 'active' : ''}`;
             d.innerHTML = `
-                <div style="font-size: 20px;">${this.idx === this.list.indexOf(t) ? '🔊' : '🎵'}</div>
-                <div style="flex:1">
-                    <div style="font-weight:600; font-size:14px;">${t.title}</div>
-                    <div style="font-size:11px; color:#71717a;">Áudio Local</div>
+                <div style="font-size:20px;">${this.idx === i ? '🔊' : '🎵'}</div>
+                <div style="flex:1; overflow:hidden;">
+                    <div style="font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${t.name}</div>
+                    <div style="font-size:10px; color:#555;">Memória Interna</div>
                 </div>
             `;
-            d.onclick = () => this.play(this.list.indexOf(t));
+            d.onclick = () => this.play(i);
             box.appendChild(d);
         });
     },
 
     play(i) {
         this.idx = i;
-        const t = this.list[i];
-        this.audio.src = t.url;
+        const track = this.list[i];
+        
+        // Criar URL temporária para o arquivo salvo
+        if(this.audio.src) URL.revokeObjectURL(this.audio.src);
+        this.audio.src = URL.createObjectURL(track.data);
+        
         this.audio.play();
-        document.getElementById('btn-toggle').innerText = '⏸';
-        document.getElementById('now-title').innerText = t.title;
+        document.getElementById('btn-play').innerText = '⏸';
+        document.getElementById('title').innerText = track.name;
         document.getElementById('art').innerHTML = '💿';
         this.render();
     },
 
     toggle() {
         if(this.idx === -1 && this.list.length > 0) return this.play(0);
-        if(this.audio.paused) { this.audio.play(); document.getElementById('btn-toggle').innerText = '⏸'; }
-        else { this.audio.pause(); document.getElementById('btn-toggle').innerText = '▶'; }
+        if(this.audio.paused) { this.audio.play(); document.getElementById('btn-play').innerText = '⏸'; }
+        else { this.audio.pause(); document.getElementById('btn-play').innerText = '▶'; }
     },
 
     next() { let n = this.idx + 1; if(n >= this.list.length) n = 0; this.play(n); },
     prev() { let p = this.idx - 1; if(p < 0) p = this.list.length - 1; this.play(p); },
 
-    sync() {
-        const c = this.audio.currentTime, d = this.audio.duration;
-        if(!d) return;
-        document.getElementById('p-fill').style.width = (c/d)*100 + '%';
-        document.getElementById('t-cur').innerText = this.fmt(c);
-        document.getElementById('t-dur').innerText = this.fmt(d);
-    },
-
-    fmt: (s) => Math.floor(s/60) + ":" + Math.floor(s%60).toString().padStart(2, '0')
+    clearLibrary() {
+        if(confirm("Deseja apagar todas as músicas salvas?")) {
+            const tx = this.db.transaction(storeName, "readwrite");
+            tx.objectStore(storeName).clear();
+            tx.oncomplete = () => {
+                this.list = [];
+                this.render();
+                location.reload();
+            };
+        }
+    }
 };
+
 core.init();
 </script>
 </body>
